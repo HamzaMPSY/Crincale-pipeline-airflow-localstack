@@ -3,6 +3,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import csv
+import os
 
 logging.basicConfig(filename="logs.log", level=logging.INFO)
 # truncating log file before new run
@@ -50,6 +51,7 @@ class Scraper:
     def scrape(self, device_type: str) -> list:
         """
             Scrapes Crinacle's databases containing technical information about Headphones and IEMs.
+            Try to read the whole table to pandas
 
             Args:
                 device_type (str): specifies the device type and url to be scraped.
@@ -84,7 +86,7 @@ class Scraper:
 
         return device_data
 
-    def convert_to_csv(self, device_data: list, device_type: str, data_level: str) -> None:
+    def convert_to_csv(self, device_data: list, path: str) -> None:
         """
         Converts a list of dictionaries to a csv file
 
@@ -93,7 +95,7 @@ class Scraper:
             device_type (str): String specifiying the type of device: headphones or iems
             data_level (str): Signifies the level of data, ie, gold, bronze, silver
         """
-        with open(f"/tmp/{device_type}-{data_level}.csv", "w") as csvfile:
+        with open(path, "w") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=device_data[0].keys())
             writer.writeheader()
             writer.writerows(device_data)
@@ -104,7 +106,10 @@ if __name__ == "__main__":
     headphones = scraper.scrape(device_type="headphones")
     iems = scraper.scrape(device_type="iems")
 
-    scraper.convert_to_csv(device_data=headphones,
-                           device_type="headphones", data_level="bronze")
     scraper.convert_to_csv(
-        device_data=iems, device_type="iems", data_level="bronze")
+        device_data=headphones,
+        path=os.getenv('PATH_TO_HEADPHONE_FILE'))
+
+    scraper.convert_to_csv(
+        device_data=iems,
+        path=os.getenv('PATH_TO_IEMS_FILE'))

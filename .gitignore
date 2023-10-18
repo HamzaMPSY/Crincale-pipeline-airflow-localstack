@@ -2,6 +2,9 @@
 **/*.env
 profiles.yml
 .user.yml
+.vscode/
+.env
+
 
 # dbt
 **target/
@@ -11,6 +14,7 @@ profiles.yml
 
 # Airflow
 logs/*
+dags/__pycache__
 config/*
 plugins/*
 volume/*
