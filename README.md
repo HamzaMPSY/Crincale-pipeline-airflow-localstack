@@ -1,11 +1,14 @@
 # Crincale pipeline with Airflow and GCP
-Pipeline that extracts data from Crinacle's Headphone and InEarMonitor databases and finalizes data for a Metabase Dashboard. 
+Pipeline that extracts data from Crinacle's Headphone and InEarMonitor databases, inject it in BigQuery, transform it with DBT then the reporting will be done using Metabase Dashboard. 
 
 # Dev Steps
 1. Write the scaper script and run in Airflow
 2. [Install Terraform](#install-terraform) and we write a project theat will create the google cloud architecture 
 3. Create the airflow connection to gcp based on this [link](https://junjiejiang94.medium.com/get-started-with-airflow-google-cloud-platform-docker-a21c46e0f797) 
 4. Create a task that will upload the bronze files to gcs
+5. Sanitize data with pydantic and the upload the silver files to gcs
+6. Create the BigQuery Dataset using Terraform
+7. use GCSToBigQueryOperator airflow operator to inject data from GCS to BigQuery Tables
 
 # Install Terraform
 `

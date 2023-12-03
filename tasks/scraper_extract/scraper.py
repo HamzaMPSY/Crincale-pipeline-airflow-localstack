@@ -77,7 +77,7 @@ class Scraper:
         rows = tbody[0].find_all("tr", recursive=False)
 
         device_data = []
-
+        # print("[+] The number of line extracted is {}".format(len(rows)))
         for row in rows:
             row_data = {}
             for i, cell in enumerate(row.find_all("td", recursive=False)):
@@ -96,9 +96,11 @@ class Scraper:
             data_level (str): Signifies the level of data, ie, gold, bronze, silver
         """
         with open(path, "w") as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=device_data[0].keys())
+            writer = csv.DictWriter(
+                csvfile, fieldnames=device_data[0].keys())
             writer.writeheader()
             writer.writerows(device_data)
+        csvfile.close()
 
 
 if __name__ == "__main__":
@@ -106,10 +108,11 @@ if __name__ == "__main__":
     headphones = scraper.scrape(device_type="headphones")
     iems = scraper.scrape(device_type="iems")
 
+    # print("[+] the the path here is {}".format(os.environ['PATH_TO_BRONZE_HEADPHONE_FILE']))
     scraper.convert_to_csv(
         device_data=headphones,
-        path=os.getenv('PATH_TO_HEADPHONE_FILE'))
+        path=os.getenv('PATH_TO_BRONZE_HEADPHONE_FILE'))
 
     scraper.convert_to_csv(
         device_data=iems,
-        path=os.getenv('PATH_TO_IEMS_FILE'))
+        path=os.getenv('PATH_TO_BRONZE_IEMS_FILE'))

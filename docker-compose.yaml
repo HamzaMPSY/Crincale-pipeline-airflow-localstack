@@ -67,10 +67,18 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     BUCKET_NAME: ${BUCKET_NAME:- crincale-pipeline-gcp-bucket}
-    PATH_TO_HEADPHONE_FILE: ${PATH_TO_HEADPHONE_FILE:- /tmp/headphones-bronze.csv}
-    PATH_TO_IEMS_FILE: ${PATH_TO_IEMS_FILE:- /tmp/iems-bronze.csv}
-    DESTINATION_HEADPHONE_FILE: ${DESTINATION_HEADPHONE_FILE:- headphones-bronze.csv}
-    DESTINATION_IEMS_FILE: ${DESTINATION_IEMS_FILE:- iems-bronze.csv}
+    PATH_TO_BRONZE_HEADPHONE_FILE: ${PATH_TO_BRONZE_HEADPHONE_FILE:- /tmp/headphones-bronze.csv}
+    PATH_TO_BRONZE_IEMS_FILE: ${PATH_TO_BRONZE_IEMS_FILE:- /tmp/iems-bronze.csv}
+    DEST_BRONZE_HEADPHONE_FILE: ${DEST_BRONZE_HEADPHONE_FILE:- headphones-bronze.csv}
+    DEST_BRONZE_IEMS_FILE: ${DEST_BRONZE_IEMS_FILE:- iems-bronze.csv}
+    PATH_TO_SILVER_HEADPHONE_FILE: ${PATH_TO_SILVER_HEADPHONE_FILE:- /tmp/headphones-silver.csv}
+    PATH_TO_SILVER_IEMS_FILE: ${PATH_TO_SILVER_IEMS_FILE:- /tmp/iems-silver.csv}
+    DEST_SILVER_HEADPHONE_FILE: ${DEST_SILVER_HEADPHONE_FILE:- headphones-silver.csv}
+    DEST_SILVER_IEMS_FILE: ${DEST_SILVER_IEMS_FILE:- iems-silver.csv}
+    BQ_DATASET_NAME: ${BQ_DATASET_NAME:- crincale}
+    BQ_HEADPHONES_TABLE_NAME: ${BQ_HEADPHONES_TABLE_NAME:- crincale-headphones}
+    BQ_IEMS_TABLE_NAME: ${BQ_IEMS_TABLE_NAME:- crincale-iems}
+    GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:- crincale-pipeline-gcp}
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -85,6 +93,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config:rw
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins:rw
     - ${AIRFLOW_PROJ_DIR:-.}/tasks:/opt/airflow/tasks:rw
+    - /tmp:/tmp:rw
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:

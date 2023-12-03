@@ -13,3 +13,13 @@ variable "region" {
   type        = string
   default     = "europe-west2"
 }
+
+variable "dataset_id" {
+  description = "BigQuery Dataset ID"
+  type        = string
+}
+
+variable "friendly_name" {
+  description = "BigQuery Dataset Friendly Name"
+  type        = string
+}
