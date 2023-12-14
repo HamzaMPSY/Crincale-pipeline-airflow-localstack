@@ -2,10 +2,11 @@ from airflow import DAG
 import os
 from airflow.utils.dates import days_ago
 from airflow.operators.bash_operator import BashOperator
-# from airflow_dbt.operators.dbt_operator import DbtRunOperator, DbtTestOperator
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 from airflow.operators.empty import EmptyOperator
+from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, ExecutionConfig
+from cosmos.profiles import GoogleCloudServiceAccountFileProfileMapping
 
 GOOGLE_CLOUD_CONN_ID = "google_cloud_conn"
 
@@ -18,6 +19,18 @@ DATASET_NAME = os.environ.get("BQ_DATASET_NAME")
 HEADPHONES_TABLE_NAME = os.environ.get("BQ_HEADPHONES_TABLE_NAME")
 IEMS_TABLE_NAME = os.environ.get("BQ_IEMS_TABLE_NAME")
 GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")
+KEY_FILE_PATH = os.environ.get('KEY_FILE_PATH')
+
+profile_config = ProfileConfig(
+    profile_name="default",
+    target_name="dev",
+    profile_mapping=GoogleCloudServiceAccountFileProfileMapping(
+        conn_id=GOOGLE_CLOUD_CONN_ID,
+        profile_args={"project": GOOGLE_CLOUD_PROJECT,
+                      "dataset": DATASET_NAME,
+                      "keyfile": KEY_FILE_PATH},
+    ),
+)
 
 with DAG(
     dag_id="audiophile_e2e_pipeline",
@@ -125,10 +138,21 @@ with DAG(
         gcp_conn_id=GOOGLE_CLOUD_CONN_ID
     )
 
+    my_cosmos_dbt_tg = DbtTaskGroup(
+        project_config=ProjectConfig(
+            f"{os.environ['AIRFLOW_HOME']}/tasks/dbt_transform/crincale_transform",
+        ),
+        profile_config=profile_config,
+        execution_config=ExecutionConfig(
+            dbt_executable_path="/home/airflow/.local/bin/dbt",
+        ),
+    )
+
 (
     scrape_audiophile_data >>
     [upload_bronze_headphones_csv_file, upload_bronze_iems_csv_file] >>
     sanitize_audiophile_data >>
     [upload_silver_headphones_csv_file, upload_silver_iems_csv_file] >> empty_task_1 >>
-    [import_headphones_table_to_bq, import_iems_table_to_bq]
+    [import_headphones_table_to_bq, import_iems_table_to_bq] >>
+    my_cosmos_dbt_tg
 )

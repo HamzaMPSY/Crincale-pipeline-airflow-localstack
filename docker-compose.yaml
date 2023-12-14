@@ -79,6 +79,7 @@ x-airflow-common:
     BQ_HEADPHONES_TABLE_NAME: ${BQ_HEADPHONES_TABLE_NAME:- crincale-headphones}
     BQ_IEMS_TABLE_NAME: ${BQ_IEMS_TABLE_NAME:- crincale-iems}
     GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:- crincale-pipeline-gcp}
+    KEY_FILE_PATH: ${KEY_FILE_PATH:- /opt/airflow/gcp/gcp_key_file.json}
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -86,7 +87,7 @@ x-airflow-common:
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- apache-airflow-providers-google}
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- apache-airflow-providers-google astronomer-cosmos dbt-core dbt-bigquery}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags:rw
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs:rw
@@ -94,6 +95,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins:rw
     - ${AIRFLOW_PROJ_DIR:-.}/tasks:/opt/airflow/tasks:rw
     - /tmp:/tmp:rw
+    - /home/mpsy/gcp:/opt/airflow/gcp:rw
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:
